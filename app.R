@@ -1,50 +1,58 @@
-#
-# This is a Shiny web application. You can run the application by clicking
-# the 'Run App' button above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
 
 library(shiny)
+library("tidyverse")
+library("ggplot2")
+library("shinythemes")
 
-# Define UI for application that draws a histogram
+setwd("~/Desktop/qPCR-app")
+
+# Reference scripts & functions
+source("calculation.R")
+
+# Define UI
 ui <- fluidPage(
 
     # Application title
-    titlePanel("Old Faithful Geyser Data"),
+    titlePanel("qPCR Analyser"),
 
-    # Sidebar with a slider input for number of bins 
+    # Sidebar with inputs 
     sidebarLayout(
         sidebarPanel(
-            sliderInput("bins",
-                        "Number of bins:",
-                        min = 1,
-                        max = 50,
-                        value = 30)
+          fileInput("qPCRdata", "Upload your qPCR data",
+                    multiple = TRUE,
+                    accept = c("text/csv",
+                               "text/comma-separated-values,text/plain",
+                               ".csv")),
+          textInput("housekeeping", "Enter your housekeeping gene", placeholder = "e.g. gadph"),
+          textInput("goi", "Enter your gene of interest", placeholder = "e.g. cft1"),
+          actionButton("calc_button", "Calculate")
         ),
 
-        # Show a plot of the generated distribution
+        # Calculation and plotting tabs
         mainPanel(
-           plotOutput("distPlot")
+           tabsetPanel(
+             tabPanel("Calculations",
+                      DT::dataTableOutput("calculations")),
+             tabPanel("Plot",
+                      plotOutput("plot"))
+           )
         )
     )
 )
 
-# Define server logic required to draw a histogram
+# Define server logic
 server <- function(input, output) {
 
-    output$distPlot <- renderPlot({
-        # generate bins based on input$bins from ui.R
-        x    <- faithful[, 2]
-        bins <- seq(min(x), max(x), length.out = input$bins + 1)
-
-        # draw the histogram with the specified number of bins
-        hist(x, breaks = bins, col = 'darkgray', border = 'white',
-             xlab = 'Waiting time to next eruption (in mins)',
-             main = 'Histogram of waiting times')
+  observeEvent(input$calc_button, {
+    output$calculations <-  DT::renderDataTable({
+    #validate(need(input$qPCRdata, 'Please upload your data.'))
+    calculateDDT(input$housekeeping, input$goi)
     })
+  })
+  output$plot <-  renderPlot({
+    validate(need(input$qPCRdata, 'Please upload your data.'))
+     })
+  
 }
 
 # Run the application 
