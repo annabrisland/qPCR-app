@@ -3,9 +3,9 @@ library("dplyr")
 library("ggplot2")
 library("stringr")
 
-calculateDDT <- function(housekeeping, goi) {
+calculateDDT <- function(file, housekeeping, goi) {
   
-  data <- read.csv("data/bna5 iron 6hours_data_rox.csv", skip = 7) %>%
+  data <- file %>%
     select(Sample.Name, Target.Name, Cт) %>%
     na_if("") %>%
     na.omit() %>%
