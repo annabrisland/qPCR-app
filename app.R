@@ -25,7 +25,9 @@ ui <- fluidPage(
                                "text/comma-separated-values,text/plain",
                                ".csv")),
           textInput("housekeeping", "Enter your housekeeping gene", placeholder = "e.g. gapdh"),
-          textInput("goi", "Enter your gene of interest", placeholder = "e.g. cft1"),
+          textInput("goi", "Enter your gene of interest", placeholder = "e.g. cft1, cfo1"),
+          textInput("untreated", "Enter your control sample name", placeholder = "e.g. low iron"),
+          textInput("treated", "Enter your treated sample name", placeholder = "e.g. high iron"),
           actionButton("calc_button", "Calculate")
         ),
 
@@ -51,12 +53,12 @@ server <- function(input, output) {
     output$calculations <-  DT::renderDataTable({
       req(input$qPCRdata)
     #validate(need(input$qPCRdata, 'Please upload your data.'))
-    calculateDDT(data(), input$housekeeping, input$goi)
+    calculatesample(data(), input$housekeeping, input$goi, input$treated, input$untreated)
     })
   })
   output$plot <-  renderPlot({
     req(input$qPCRdata)
-    qPCRplot(data(), input$housekeeping, input$goi)
+    qPCRplot(data(), input$housekeeping, input$goi, input$treated, input$untreated)
      })
   
 }

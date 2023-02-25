@@ -1,7 +1,7 @@
 library("tidyverse")
 library("ggplot2")
 
-qPCRplot <- function(file, housekeeping, goi){
+qPCRplot <- function(file, housekeeping, goi, treated, untreated){
   
   # housekeeping <- "gapdh"
   # goi <- "cft1"
@@ -16,31 +16,50 @@ qPCRplot <- function(file, housekeeping, goi){
   data$replicate <- str_extract(data$Sample.Name, "\\d{1,3}$")
   data$Sample.Name <- str_replace(data$Sample.Name, "\\d{1,3}$", "")
   
-  ##dataset specific
-  
   analysis <- data %>%
     filter(replicate == c(1,2,3)) %>%
-    filter(Target.Name == housekeeping | Target.Name == goi) #%>%
-  #filter(Sample.Name == "6h")
-  analysis$Sample.Name <- str_c(analysis$Sample.Name, '', analysis$replicate)
+    filter(Target.Name == housekeeping | Target.Name == goi) 
   
-  analysis <- analysis %>%
+  treated <- filter(analysis, Sample.Name == treated)
+  untreated <- filter(analysis, Sample.Name == untreated)
+  
+  treated$Sample.Name <- str_c(treated$Sample.Name, '', treated$replicate)
+  untreated$Sample.Name <- str_c(untreated$Sample.Name, '', untreated$replicate)
+  
+  treated <- treated %>%
     select(!replicate) %>%
     group_by(Sample.Name) %>%
     spread(Target.Name, Cт)
-  colnames(analysis)[2:3] <- c("goiCT", "housekeepingCT")
-  analysis$deltaCT <- analysis$goiCT - analysis$housekeepingCT
-  control_average = mean(analysis$housekeepingCT)
-  analysis$deltadeltaCT = analysis$deltaCT - control_average
-  analysis$foldGeneExp = 2^-(analysis$deltadeltaCT)
-  analysis$logFC = log(analysis$foldGeneExp)
   
-  analysis$replicate <- str_extract(analysis$Sample.Name, "\\d{1,3}$")
-  analysis$Sample.Name <- str_replace(analysis$Sample.Name, "\\d{1,3}$", "")
-  
-  summary <- analysis %>%
+  untreated <- untreated %>%
+    select(!replicate) %>%
     group_by(Sample.Name) %>%
-    summarise(mean = mean(logFC), sd = sd(logFC))
+    spread(Target.Name, Cт)
+  
+  colnames(treated)[2:3] <- c("goiCT", "housekeepingCT")
+  colnames(untreated)[2:3] <- c("goiCT", "housekeepingCT")
+  
+  treated$deltaCT <- treated$goiCT - treated$housekeepingCT
+  untreated$deltaCT <- untreated$goiCT - untreated$housekeepingCT
+  
+  control_average = mean(untreated$deltaCT)
+  treated$deltadeltaCT = treated$deltaCT - control_average
+  treated$foldGeneExp = 2^-(treated$deltadeltaCT)
+  treated$logFC = log(treated$foldGeneExp)
+  
+  untreated$deltadeltaCT = untreated$deltaCT - control_average
+  untreated$foldGeneExp = 2^-(untreated$deltadeltaCT)
+  untreated$logFC = log(untreated$foldGeneExp)
+  
+  final <- rbind(untreated, treated)
+  
+  
+  final$replicate <- str_extract(final$Sample.Name, "\\d{1,3}$")
+  final$Sample.Name <- str_replace(final$Sample.Name, "\\d{1,3}$", "")
+  
+  summary <- final %>%
+    group_by(Sample.Name) %>%
+    summarise(mean = mean(foldGeneExp), sd = sd(foldGeneExp))
   
   
   #### Plotting
@@ -55,7 +74,7 @@ qPCRplot <- function(file, housekeeping, goi){
           axis.title.y = element_text(face = "bold", size = 20),
           legend.text = element_text(face = "bold",size = 12),
           title = element_text(face = "bold",size = 14))+
-    labs(y = "logFC")+
+    labs(y = "Fold gene expression")+
     scale_fill_manual(values =c("#E1999E","#7D0008","#4D0007","#A1CF9C","#117A07","#004D0E"))
   
   plot1
