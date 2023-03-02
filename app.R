@@ -8,7 +8,7 @@ setwd("~/Desktop/qPCR-app")
 
 # Reference scripts & functions
 source("calculation.R")
-source("plot.R")
+#source("plot.R")
 
 # Define UI
 ui <- fluidPage(
@@ -25,7 +25,7 @@ ui <- fluidPage(
                                "text/comma-separated-values,text/plain",
                                ".csv")),
           textInput("housekeeping", "Enter your housekeeping gene", placeholder = "e.g. gapdh"),
-          textInput("goi", "Enter your gene of interest", placeholder = "e.g. cft1, cfo1"),
+          textInput("goi", "Enter your gene of interest", placeholder = "e.g. cft1 cfo1"),
           textInput("untreated", "Enter your control sample name", placeholder = "e.g. low iron"),
           textInput("treated", "Enter your treated sample name", placeholder = "e.g. high iron"),
           actionButton("calc_button", "Calculate")
@@ -52,7 +52,6 @@ server <- function(input, output) {
   observeEvent(input$calc_button, {
     output$calculations <-  DT::renderDataTable({
       req(input$qPCRdata)
-    #validate(need(input$qPCRdata, 'Please upload your data.'))
     calculatesample(data(), input$housekeeping, input$goi, input$treated, input$untreated)
     })
   })
