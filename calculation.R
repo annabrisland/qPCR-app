@@ -6,7 +6,7 @@ library("stringr")
 
 calculatesample <- function(file, housekeeping, goi, vtreated, vuntreated) {
   
-  # file <- read.csv("data/bna5 iron 6hours_data_rox.csv", skip = 7)
+   file <- read.csv("data/bna5 iron 6hours_data_rox.csv", skip = 7)
   # housekeeping <- "gapdh"
   # goi <- c("cft1 cfo1")
   # #i = "cft1"
@@ -22,7 +22,8 @@ calculatesample <- function(file, housekeeping, goi, vtreated, vuntreated) {
       
       data <- file %>%
         select(Sample.Name, Target.Name, Cт) %>%
-        na_if("") %>%
+        mutate(across(where(is.character), ~na_if(., ""))) %>%
+        mutate(across(where(is.numeric), ~na_if(., ""))) %>%
         na.omit() %>%
         mutate(Cт = na_if(Cт, "Undetermined")) %>%
         mutate(Cт = as.numeric(Cт))
@@ -83,7 +84,8 @@ calculatesample <- function(file, housekeeping, goi, vtreated, vuntreated) {
     
     data <- file %>%
       select(Sample.Name, Target.Name, Cт) %>%
-      na_if("") %>%
+      mutate(across(where(is.character), ~na_if(., ""))) %>%
+      mutate(across(where(is.numeric), ~na_if(., ""))) %>%
       na.omit() %>%
       mutate(Cт = na_if(Cт, "Undetermined")) %>%
       mutate(Cт = as.numeric(Cт))
