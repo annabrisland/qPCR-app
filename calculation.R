@@ -6,7 +6,7 @@ library("stringr")
 
 calculatesample <- function(file, housekeeping, goi, vtreated, vuntreated) {
   
-   file <- read.csv("data/bna5 iron 6hours_data_rox.csv", skip = 7)
+   #file <- read.csv("data/bna5 iron 6hours_data_rox.csv", skip = 7)
   # housekeeping <- "gapdh"
   # goi <- c("cft1 cfo1")
   # #i = "cft1"
