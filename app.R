@@ -27,7 +27,7 @@ ui <- fluidPage(
           textInput("housekeeping", "Enter your housekeeping gene", placeholder = "e.g. gapdh"),
           textInput("goi", "Enter your gene of interest", placeholder = "e.g. cft1 cfo1"),
           textInput("untreated", "Enter your control sample name", placeholder = "e.g. low iron"),
-          textInput("treated", "Enter your treated sample name", placeholder = "e.g. high iron"),
+          textInput("treated", "Enter your treated sample names", placeholder = "e.g. high iron, glucose"),
           actionButton("calc_button", "Calculate")
         ),
 
